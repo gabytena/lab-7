@@ -1,9 +1,17 @@
 ---
 title: "Lab 7: Functions + Fish"
-author: "Your name here!"
-format: html
+author: "Gabriela Tena"
+format: 
+  html:  
+    embed-resources: true
+    code-tools: true
+    toc: true
 editor: source
-embed-resources: true
+execute: 
+  echo: true
+warning: false
+message: false
+theme: "solar"
 ---
 
 The goal of this lab is learn more about exploring missing data and writing
@@ -11,7 +19,7 @@ modular code.
 
 ```{r}
 #| label: setup
-
+library(tidyverse)
 
 ```
 
@@ -127,9 +135,9 @@ above!
 
 x <- c(1:25, NA)
 
-rescaled <- rescale_01(x)
-min(rescaled, na.rm = TRUE)
-max(rescaled, na.rm = TRUE)
+#rescaled <- rescale_01(x)
+#min(rescaled, na.rm = TRUE)
+#max(rescaled, na.rm = TRUE)
 ```
 
 Next, let's test the function on the `length` column of the `BlackfootFish` data.
@@ -144,11 +152,11 @@ statement in order to create a `length_scaled` variable.
 ```{r}
 #| label: compare-original-with-rescaled-lengths
 
-fish |>  
-  ggplot(aes(x = length)) + 
-  geom_histogram(binwidth = 45) +
-  labs(x = "Original Values of Fish Length (mm)") +
-  scale_y_continuous(limits = c(0,4000))
+#fish |>  
+  #ggplot(aes(x = length)) + 
+  #geom_histogram(binwidth = 45) +
+  #labs(x = "Original Values of Fish Length (mm)") +
+  #scale_y_continuous(limits = c(0,4000))
 
 # Code for Q7 plot.
 
