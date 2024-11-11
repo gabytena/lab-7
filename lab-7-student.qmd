@@ -75,16 +75,21 @@ fish |>
 ```{r}
 #| label: visual-of-missing-values-over-time
 fish |>
-  group_by(year) |>
-  summarize(missing_count = sum(if_any(everything(),
-                                       ~is.na(.)))) |>
-  ggplot(aes(x = year, 
-             y = missing_count)) +
+  mutate(missing = if_any(everything(), is.na)) |> 
+  group_by(year, section, trip) |>
+  summarize(missing_count = sum(if_any(everything(), 
+                                       ~is.na(.))), 
+            .groups = "drop") |>
+  ggplot(aes(x = year, y = missing_count, color = section)) +
   geom_line() +
-  geom_point() +
-  labs(title = "Count of Missing Values by Year",
-       x = "Year",
-       y = "") +
+  geom_point()+
+  facet_wrap(~trip) +
+  labs(
+    title = "Count of Missing Values by Year, Section, and Trip",
+    x = "Year",
+    y = "",
+    color = "Section"
+  ) +
   theme_minimal()
 ```
 
