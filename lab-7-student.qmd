@@ -21,6 +21,8 @@ modular code.
 #| label: setup
 library(tidyverse)
 
+fish <- read_csv('https://raw.githubusercontent.com/gabytena/lab-7/refs/heads/main/data/BlackfootFish.csv')
+
 ```
 
 ## The Data
@@ -52,14 +54,37 @@ measurement errors.
 
 ```{r}
 #| label: find-missing-values
-
+fish |>
+  summarize(across(everything(), 
+                   ~sum(is.na(.)))) |>
+  pivot_longer(cols = everything(), 
+               names_to = "variables", 
+               values_to = "number_missing") |>
+  filter(number_missing > 0) |>
+   mutate(obs_missing = fish |> 
+           filter(if_any(everything(), 
+                         ~ is.na(.))) |> 
+           summarize(obs_missing = n()) |> 
+           pull(obs_missing))
+  
 ```
 
 **2. Create ONE thoughtful visualization that explores the frequency of missing values across the different years, sections, and trips.**
 
 ```{r}
 #| label: visual-of-missing-values-over-time
-
+fish |>
+  group_by(year) |>
+  summarize(missing_count = sum(if_any(everything(),
+                                       ~is.na(.)))) |>
+  ggplot(aes(x = year, 
+             y = missing_count)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Count of Missing Values by Year",
+       x = "Year",
+       y = "") +
+  theme_minimal()
 ```
 
 ## Rescaling the Data
@@ -92,6 +117,7 @@ understand the intent of the process. *Additionally, it can make it very difficu
 
 **3. What is the mistake I made in the above rescaling code?**
 
+The wrong variable was used in the weight calculation.
 
 When you find yourself copy-pasting lines of code, it's time to write a
 function, instead!
@@ -103,6 +129,18 @@ function, instead!
 
 ```{r}
 #| label: write-rescale-function
+rescale_01 <- function(vec){
+  if (!is.numeric(vec) | 
+      length(vec) <= 1) {
+    stop("error with input")
+  }
+  
+  min_max <- range(vec, 
+                   na.rm = TRUE)
+  
+  return((vec - min_max[1]) / (min_max[2] - min_max[1]))
+  
+  }
 
 ```
 
@@ -135,9 +173,9 @@ above!
 
 x <- c(1:25, NA)
 
-#rescaled <- rescale_01(x)
-#min(rescaled, na.rm = TRUE)
-#max(rescaled, na.rm = TRUE)
+rescaled <- rescale_01(x)
+min(rescaled, na.rm = TRUE)
+max(rescaled, na.rm = TRUE)
 ```
 
 Next, let's test the function on the `length` column of the `BlackfootFish` data.
@@ -151,15 +189,23 @@ statement in order to create a `length_scaled` variable.
 
 ```{r}
 #| label: compare-original-with-rescaled-lengths
+#| layout-ncol: 2
 
-#fish |>  
-  #ggplot(aes(x = length)) + 
-  #geom_histogram(binwidth = 45) +
-  #labs(x = "Original Values of Fish Length (mm)") +
-  #scale_y_continuous(limits = c(0,4000))
+fish |>  
+  ggplot(aes(x = length)) + 
+  geom_histogram(binwidth = 45) +
+  labs(x = "Original Values of Fish Length (mm)") +
+  scale_y_continuous(limits = c(0,
+                                4000))
 
 # Code for Q7 plot.
-
+fish |>
+  mutate(length_scaled = rescale_01(length))|>
+  ggplot(aes(x = length_scaled)) + 
+  geom_histogram(binwidth = .05) +
+  labs(x = "Re-Scaled Values of Fish Length (mm)") +
+  scale_y_continuous(limits = c(0,
+                                4000))
 ```
 
 ::: callout-tip
@@ -191,6 +237,14 @@ section of R for Data Science!
 
 ```{r}
 #| label: rescale-data-frame-function
+rescale_column <- function(df, var){
+  df <- df |>
+    mutate(across(all_of(var),
+                  ~ rescale_01(.), 
+                  .names = "{.col}_scaled"))  
+  
+  return(df)
+}
 
 ```
 
@@ -202,5 +256,7 @@ I expect that you carry out this process by calling the `rescale_column()` funct
 
 ```{r}
 #| label: rescale-two-columns
-
+rescale_column(fish, 
+               c("length", 
+                       "weight"))
 ```
