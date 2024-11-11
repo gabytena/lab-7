@@ -1,12 +1,13 @@
 ---
 title: "Challenge 7: Incorporating Multiple Inputs"
 subtitle: "Functions + Fish"
-author: "Your name here!"
+author: "Gabriela Tena!"
 format: 
   html:  
     embed-resources: true
     code-tools: true
     toc: true
+    code-fold: true
 editor: source
 execute: 
   echo: true
